@@ -33,6 +33,7 @@ let posts = [
 ];
 
 let lastId = 3;
+let date = new Date().toJSON();
 
 // Middleware
 app.use(bodyParser.json());
@@ -42,13 +43,58 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 //CHALLENGE 1: GET All posts
 
+app.get('/posts', (req, res) => {
+  res.json(posts);
+});
+
 //CHALLENGE 2: GET a specific post by id
+
+app.get("/posts/:id", (req, res) => {
+  const id = parseInt(req.params.id);
+  const foundPost = posts.find((post) => post.id === id);
+  res.json(foundPost);
+});
 
 //CHALLENGE 3: POST a new post
 
+app.post("/posts", (req, res) => {
+  const newPost = {
+    id: posts.length+1,
+    title: req.body.title,
+    content: req.body.content,
+    author: req.body.author,
+    date: date,
+  };
+  posts.push(newPost);
+  res.json(posts);
+  });
+
 //CHALLENGE 4: PATCH a post when you just want to update one parameter
 
+app.patch("/posts/:id", (req, res) => {
+  const id = req.params.id;
+  posts[id-1].title = req.body.title || posts[id-1].title;
+  posts[id-1].content = req.body.content || posts[id-1].content;
+  posts[id-1].author = req.body.author || posts[id-1].author;
+  console.log(req.body);
+  // if nothing were typed in leave what it was before
+  res.json(posts[id-1]);
+});
+
+
 //CHALLENGE 5: DELETE a specific post by providing the post id.
+
+app.delete("/posts/:id", (req, res) => {
+  const id = req.params.id;
+
+  if (posts[id-1]) {
+    posts.splice(id-1, 1);
+    res.json(posts);
+  } else {
+    res.status(404).json({ error:`Post with id: ${id} not found. No posts were deleted.`});
+  }
+
+});
 
 app.listen(port, () => {
   console.log(`API is running at http://localhost:${port}`);
